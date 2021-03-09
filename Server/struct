@@ -1,0 +1,19 @@
+
+
+struct header{
+
+}
+
+struct body {
+
+}
+
+
+v,time,token,body
+
+{
+    "v":"1.0.0","time":346786767,"token":"ji9x83j3ak",
+    "cmd":"user.login","body":{"username":"gary"}
+}
+
+{"v":"1.0.0","time":346786767,"token":"ji9x83j3ak","cmd":"user.login","body":{"username":"gary"}}
