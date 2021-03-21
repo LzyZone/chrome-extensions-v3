@@ -7,7 +7,12 @@ namespace Server\Lib;
  *
  */
 class Protocol{
-    public function decode($stream){
 
+    public function decode($content){
+
+    }
+
+    public function encode($data){
+        return json_encode($data,JSON_UNESCAPED_UNICODE);
     }
 }

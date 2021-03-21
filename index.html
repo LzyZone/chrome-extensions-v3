@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Test WS</title>
+</head>
+<body>
+
+<div>
+    消息 <textarea></textarea>
+</div>
+
+<div>
+    <button onclick="send();">发送</button>
+</div>
+
+
+<script>
+    // 打开一个 web socket
+    var ws = new WebSocket("ws://localhost:9502");
+
+    ws.onopen = function()
+    {
+        // Web Socket 已连接上，使用 send() 方法发送数据
+        let data = {
+            "v":"1.0.0","time":346786767,"token":"",
+            "cmd":"user.login","body":{"username":"admin","password":"123456"}
+        };
+        ws.send(JSON.stringify(data));
+    };
+
+    ws.onmessage = function (evt)
+    {
+        var received_msg = evt.data;
+        console.log('数据已接收:',received_msg);
+    };
+
+    ws.onclose = function()
+    {
+        // 关闭 websocket
+        console.log('连接已关闭');
+    };
+    
+    
+    function send() {
+        let data = {
+            "v":"1.0.0","time":346786767,"token":"ji9x83j3ak",
+            "cmd":"Msg.listings","body":{}
+        };
+        ws.send(JSON.stringify(data));
+        ws.send();
+    }
+</script>
+</body>
+</html>

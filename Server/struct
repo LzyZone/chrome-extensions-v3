@@ -1,5 +1,3 @@
-
-
 struct header{
 
 }
@@ -13,7 +11,7 @@ v,time,token,body
 
 {
     "v":"1.0.0","time":346786767,"token":"ji9x83j3ak",
-    "cmd":"user.login","body":{"username":"gary"}
+    "cmd":"user.login","body":{"username":"gary","password":"123"}
 }
 
 {"v":"1.0.0","time":346786767,"token":"ji9x83j3ak","cmd":"user.login","body":{"username":"gary"}}

@@ -1,0 +1,10 @@
+{
+  "name": "chrome extensions",
+  "autoload": {
+    "psr-4": {
+      "Server\\": "",
+      "Server\\Cmd\\": "Cmd/",
+      "Server\\Lib\\": "Lib/"
+    }
+  }
+}
