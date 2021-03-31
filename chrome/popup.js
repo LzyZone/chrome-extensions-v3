@@ -1,27 +1,30 @@
 // Initialize butotn with users's prefered color
 let loginBtn = document.getElementById("login-btn");
+let testBtn = document.getElementById("test-btn");
+
+
+chrome.storage.sync.get(['token'], function(result) {
+  if(result.token){
+    document.getElementById("login").style.display = 'none';
+    document.getElementById("options").style.display = 'block';
+  }
+});
+
 
 // When the button is clicked, inject setPageBackgroundColor into current page
 loginBtn.addEventListener("click", async () => {
-
   let username = document.getElementById('username').value;
   let password = document.getElementById('password').value;
 
   chrome.runtime.sendMessage({cmd: "user.login",params:{username:username,password:password}}, function(response) {
     console.log(response);
   });
-  return false;
-  chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-    chrome.tabs.sendMessage(tabs[0].id, {greeting: "hello"}, function(response) {
-      console.log(response.farewell);
-    });
+});
+
+testBtn.addEventListener("click", async () => {
+  chrome.runtime.sendMessage({cmd: "msg.listings",params:{}}, function(response) {
+
   });
-  /*
-  let [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-  chrome.scripting.executeScript({
-    target: { tabId: tab.id },
-    function: setPageBackgroundColor,
-  });*/
 });
 
 

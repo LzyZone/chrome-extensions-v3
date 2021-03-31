@@ -2,9 +2,12 @@
 <html>
   <head>
     <meta charset="UTF-8">
+    <style type="text/css">
+      #options{display: none;}
+    </style>
   </head>
   <body>
-    <div>
+    <div id="login">
       <div>
         用户名 <input type="text" name="username" id="username" value="admin">
       </div>
@@ -12,6 +15,10 @@
         密码 <input type="password" name="password" id="password" value="">
       </div>
       <input type="button" id="login-btn" value="登录">
+    </div>
+
+    <div id="options">
+      <input type="button" id="test-btn" value="测试">
     </div>
 
     <div style="display: none;background-color: rgba(0,0,0,0.4);position: absolute;top:0;left: 0;right:0;bottom: 0">

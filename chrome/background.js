@@ -17,23 +17,22 @@ chrome.runtime.onMessage.addListener(
           break;
         case 'user.login':
           login(params.username,params.password);
+          break;
+        case 'test':
+          sokect.send('test',{});
+          break;
       }
       sendResponse({});
     }
 );
 
 function login(username,password) {
-    let content = {
-      v:'1.0.0',
-      time:'xxxx',
-      token:null,
-      cmd:'user.login',
-      body:{
-        username:username,
-        password:password
-      }
+
+    let params = {
+      username:username,
+      password:password
     }
-    sokect.send(JSON.stringify(content));
+    sokect.send('user.login',params);
 }
 
 
@@ -51,6 +50,11 @@ var ws = function (url) {
     this.sokect.onmessage = function (evt) {
       var received_msg = evt.data;
       received_msg = JSON.parse(received_msg);
+      if(received_msg.cmd == 'user.login' && received_msg.err_code == 0){
+          chrome.storage.sync.set({token: received_msg.body.token}, function() {
+            console.log('Value is set to ' + received_msg.body.token);
+          });
+      }
       popupPort.postMessage({cmd:received_msg.cmd,data:received_msg});
       console.log('数据已接收:',received_msg);
     }
@@ -78,9 +82,16 @@ var ws = function (url) {
     }
   }
 
-  this.send = function (content) {
+  this.send = function (cmd,params) {
     if(this.sokect.readyState == 1){
-      this.sokect.send(content);
+      let content = {
+        v:'1.0.0',
+        time:'xxxx',
+        token:token,
+        cmd:cmd,
+        body:params
+      }
+      this.sokect.send(JSON.stringify(content));
     }
   }
 
@@ -88,6 +99,13 @@ var ws = function (url) {
 
 var sokect = new ws('ws://localhost:9502');
 sokect.connect();
+
+var token = null;
+chrome.storage.sync.get(['token'], function(result) {
+  token = result.token;
+  console.log(token);
+});
+
 
 var popupPort = null;
 chrome.runtime.onConnect.addListener(function(port) {
