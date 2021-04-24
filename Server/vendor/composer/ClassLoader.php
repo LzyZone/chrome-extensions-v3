@@ -37,8 +37,13 @@ namespace Composer\Autoload;
  *
  * @author Fabien Potencier <fabien@symfony.com>
  * @author Jordi Boggiano <j.boggiano@seld.be>
+<<<<<<< HEAD
  * @see    http://www.php-fig.org/psr/psr-0/
  * @see    http://www.php-fig.org/psr/psr-4/
+=======
+ * @see    https://www.php-fig.org/psr/psr-0/
+ * @see    https://www.php-fig.org/psr/psr-4/
+>>>>>>> ef5616327c20161ef96f769993449daabe998db5
  */
 class ClassLoader
 {
@@ -60,7 +65,11 @@ class ClassLoader
     public function getPrefixes()
     {
         if (!empty($this->prefixesPsr0)) {
+<<<<<<< HEAD
             return call_user_func_array('array_merge', $this->prefixesPsr0);
+=======
+            return call_user_func_array('array_merge', array_values($this->prefixesPsr0));
+>>>>>>> ef5616327c20161ef96f769993449daabe998db5
         }
 
         return array();

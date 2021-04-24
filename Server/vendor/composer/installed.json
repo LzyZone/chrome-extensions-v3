@@ -1,1 +1,9 @@
+<<<<<<< HEAD
 []
+=======
+{
+    "packages": [],
+    "dev": true,
+    "dev-package-names": []
+}
+>>>>>>> ef5616327c20161ef96f769993449daabe998db5

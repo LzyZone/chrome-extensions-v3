@@ -17,12 +17,17 @@ chrome.runtime.onMessage.addListener(
           break;
         case 'user.login':
           login(params.username,params.password);
+          break;
+        case 'test':
+          sokect.send('test',{});
+          break;
       }
       sendResponse({});
     }
 );
 
 function login(username,password) {
+<<<<<<< HEAD
     let content = {
       v:'1.0.0',
       time:'xxxx',
@@ -34,6 +39,14 @@ function login(username,password) {
       }
     }
     socket.send(JSON.stringify(content));
+=======
+
+    let params = {
+      username:username,
+      password:password
+    }
+    sokect.send('user.login',params);
+>>>>>>> ef5616327c20161ef96f769993449daabe998db5
 }
 
 
@@ -50,6 +63,7 @@ var ws = function (url) {
     }
     this.socket.onmessage = function (evt) {
       var received_msg = evt.data;
+<<<<<<< HEAD
       received_data = JSON.parse(received_msg);
       console.log('数据已接收:',received_data);
       switch (received_data.cmd) {
@@ -64,6 +78,16 @@ var ws = function (url) {
 
           break;
       }
+=======
+      received_msg = JSON.parse(received_msg);
+      if(received_msg.cmd == 'user.login' && received_msg.err_code == 0){
+          chrome.storage.sync.set({token: received_msg.body.token}, function() {
+            console.log('Value is set to ' + received_msg.body.token);
+          });
+      }
+      popupPort.postMessage({cmd:received_msg.cmd,data:received_msg});
+      console.log('数据已接收:',received_msg);
+>>>>>>> ef5616327c20161ef96f769993449daabe998db5
     }
 
     this.socket.onclose = function()
@@ -89,9 +113,22 @@ var ws = function (url) {
     }
   }
 
+<<<<<<< HEAD
   this.send = function (content) {
     if(this.socket.readyState == 1){
       this.socket.send(content);
+=======
+  this.send = function (cmd,params) {
+    if(this.sokect.readyState == 1){
+      let content = {
+        v:'1.0.0',
+        time:'xxxx',
+        token:token,
+        cmd:cmd,
+        body:params
+      }
+      this.sokect.send(JSON.stringify(content));
+>>>>>>> ef5616327c20161ef96f769993449daabe998db5
     }
   }
 
@@ -120,6 +157,13 @@ var token = null;
 chrome.storage.sync.get(['token'], function(result) {
   token = result.token;
 });
+
+var token = null;
+chrome.storage.sync.get(['token'], function(result) {
+  token = result.token;
+  console.log(token);
+});
+
 
 var popupPort = null;
 chrome.runtime.onConnect.addListener(function(port) {

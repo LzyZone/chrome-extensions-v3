@@ -1,7 +1,20 @@
 <?php
-require_once 'vendor/autoload.php';
+require_once 'init.php';
 
 $server = new Swoole\Websocket\Server('127.0.0.1', 9502);
+$server->set(['task_worker_num' => 1]);
+$server->on('WorkerStart',function ($server,$worker_id){
+    /**
+     * global $argv;
+    if($worker_id >= $server->setting['worker_num']) {
+    swoole_set_process_name("php {$argv[0]} task worker");
+    } else {
+    swoole_set_process_name("php {$argv[0]} event worker");
+    }
+     */
+    $task_id = $server->task('Async');
+    echo "Dispatch AsyncTask: [id={$task_id}]\n";
+});
 
 $server->on('open', function($server, $req) {
     echo "connection open: {$req->fd}\n";
@@ -33,15 +46,26 @@ $server->on('message', function($server, $frame) {
 
         $data['cmd'] = strtolower($data['cmd']);
 
-        if(empty($data['token']) && strtolower($data['cmd']) != 'user.login'){
+        if(empty($data['token']) && $data['cmd'] != 'user.login'){
             throw new \Server\Lib\ServerException('权限认证失败！');
         }
 
+        if($data['token']){
+            $isLogin = (new \Server\Cmd\User())->checkLogin($data['token']);
+            if(!$isLogin){
+                throw new \Server\Lib\ServerException('登录已过期，请重新登录！',6000);
+            }
+        }
         //check token
         $obj = new $cmd_class();
         $ret = call_user_func_array([$obj,$cmd_class_fun],$data['body']);
+<<<<<<< HEAD
         if($response->getCmd() == 'user.login'){
             $response->setToken($ret['token']);
+=======
+        if($data['cmd'] == 'user.login'){
+            $response->setToken($ret);
+>>>>>>> ef5616327c20161ef96f769993449daabe998db5
         }
         $server->push($frame->fd,$response->success($ret));
     }catch (\Server\Lib\ServerException $e){
@@ -55,5 +79,33 @@ $server->on('message', function($server, $frame) {
 $server->on('close', function($server, $fd) {
     echo "connection close: {$fd}\n";
 });
+
+$server->on('task', function ($server, $task_id, $reactor_id, $data) {
+    echo "New AsyncTask[id={$task_id}]\n";
+    $response = new \Server\Lib\Response();
+    $response->setCmd('notice');
+    while (true){
+        $list = \Server\Lib\ORedis::getInstance()->blPop('list',2);
+        var_dump($list);
+        $conn_list = $server->getClientList();
+        var_dump($conn_list);
+        if ($conn_list === false or count($conn_list) === 0) {
+            echo "finish\n";
+            sleep(3);
+            continue;
+        }
+
+        foreach ($conn_list as $fd) {
+            $server->send($fd, $response->success(['msg'=>$list[1]]));
+        }
+    }
+    $server->finish("{$data} -> OK");
+});
+
+$server->on('finish', function ($server, $task_id, $data) {
+    echo "AsyncTask[{$task_id}] finished: {$data}\n";
+});
+
+
 
 $server->start();
