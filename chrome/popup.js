@@ -1,11 +1,25 @@
 // Initialize butotn with users's prefered color
 let loginBtn = document.getElementById("login-btn");
+let login = document.getElementById("login");
+let loginOut = document.getElementById("login-out");
+let username,password;
+
+chrome.storage.sync.get(['token'], function(result) {
+  console.log('Value currently is ' + result.token);
+  notify('token='+result.token);
+  if(result.token){
+    chrome.runtime.sendMessage({cmd: "check.login",params:{token:result.token}}, function(response) {
+      console.log(response);
+    });
+  }
+});
+
 
 // When the button is clicked, inject setPageBackgroundColor into current page
 loginBtn.addEventListener("click", async () => {
 
-  let username = document.getElementById('username').value;
-  let password = document.getElementById('password').value;
+  username = document.getElementById('username').value;
+  password = document.getElementById('password').value;
 
   chrome.runtime.sendMessage({cmd: "user.login",params:{username:username,password:password}}, function(response) {
     console.log(response);
@@ -23,8 +37,6 @@ loginBtn.addEventListener("click", async () => {
     function: setPageBackgroundColor,
   });*/
 });
-
-
 
 function notify(msg,title) {
   chrome.notifications.getPermissionLevel(function (level) {
@@ -47,8 +59,16 @@ function callback(notificationId) {
 
 var port = chrome.runtime.connect({name: "popup"});
 //port.postMessage({joke: "Knock knock"});
-port.onMessage.addListener(function(msg) {
-  if (msg.cmd == "user.login"){
-      notify(msg.data.err_msg);
+port.onMessage.addListener(function(data) {
+  if (data.cmd == "user.login"){
+      if (data.err_code == 0) {
+        chrome.storage.sync.set({'username': username,'password':password,'token':data.token}, function() {
+
+        });
+        login.style.display = 'none';
+        loginOut.style.display = 'block';
+      }
+      //notify(data.content.err_msg);
+      //notify(username+',token='+data.content.token);
   }
 });

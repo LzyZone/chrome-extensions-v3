@@ -12,8 +12,16 @@ $server->on('message', function($server, $frame) {
     $response = new \Server\Lib\Response();
     $data = json_decode($frame->data,true);
     $response->setCmd($data['cmd']);
-    if($data['cmd'] != 'user.login'){
-        $response->setToken($data['token']);
+    $redis = \Server\Factory\FactoryRedis::cache();
+    if($response->getCmd() == 'ping'){
+        if($redis->exists($data['token'])){
+            $response->setToken($data['token']);
+            $server->push($frame->fd,$response->success());
+        }else{
+            $response->setToken(null);
+            $server->push($frame->fd,$response->error(1200,'token invalid'));
+        }
+        return false;
     }
 
     try{
@@ -32,6 +40,9 @@ $server->on('message', function($server, $frame) {
         //check token
         $obj = new $cmd_class();
         $ret = call_user_func_array([$obj,$cmd_class_fun],$data['body']);
+        if($response->getCmd() == 'user.login'){
+            $response->setToken($ret['token']);
+        }
         $server->push($frame->fd,$response->success($ret));
     }catch (\Server\Lib\ServerException $e){
         $err_code = $e->getCode() ? $e->getCode() : 1000;

@@ -26,43 +26,54 @@ function login(username,password) {
     let content = {
       v:'1.0.0',
       time:'xxxx',
-      token:null,
+      token:token,
       cmd:'user.login',
       body:{
         username:username,
         password:password
       }
     }
-    sokect.send(JSON.stringify(content));
+    socket.send(JSON.stringify(content));
 }
 
 
 var ws = function (url) {
-  this.sokect = null;
+  this.socket = null;
   this.url = url;
   this.reconnectTimer = null;
   this.reconnectTimeStep = 500;
   this.connect = function () {
     let self = this;
-    this.sokect = new WebSocket(this.url);
-    this.sokect.onopen = function () {
+    this.socket = new WebSocket(this.url);
+    this.socket.onopen = function () {
       console.log('open');
     }
-    this.sokect.onmessage = function (evt) {
+    this.socket.onmessage = function (evt) {
       var received_msg = evt.data;
-      received_msg = JSON.parse(received_msg);
-      popupPort.postMessage({cmd:received_msg.cmd,data:received_msg});
-      console.log('数据已接收:',received_msg);
+      received_data = JSON.parse(received_msg);
+      console.log('数据已接收:',received_data);
+      switch (received_data.cmd) {
+        case 'user.login':
+          if(received_data.err_code == 0){
+            console.log('ping...');
+            socket.ping();
+          }
+          popupPort.postMessage(received_data);
+          break;
+        case 'ping':
+
+          break;
+      }
     }
 
-    this.sokect.onclose = function()
+    this.socket.onclose = function()
     {
       // 关闭 websocket
       console.log('连接已关闭');
       self.reconnect();
     };
 
-    this.sokect.onerror = function () {
+    this.socket.onerror = function () {
       self.reconnect();
     }
   }
@@ -79,15 +90,36 @@ var ws = function (url) {
   }
 
   this.send = function (content) {
-    if(this.sokect.readyState == 1){
-      this.sokect.send(content);
+    if(this.socket.readyState == 1){
+      this.socket.send(content);
     }
+  }
+
+  this.ping = function () {
+    setInterval(function () {
+      console.log('socket,',socket.socket.readyState);
+      if(socket.socket.readyState == 1){
+        let content = {
+          v:'1.0.0',
+          time:'xxxx',
+          token:token,
+          cmd:'ping',
+          body:{}
+        }
+        socket.send(JSON.stringify(content));
+      }
+    },1500);
   }
 
 }
 
-var sokect = new ws('ws://localhost:9502');
-sokect.connect();
+var socket = new ws('ws://localhost:9502');
+socket.connect();
+
+var token = null;
+chrome.storage.sync.get(['token'], function(result) {
+  token = result.token;
+});
 
 var popupPort = null;
 chrome.runtime.onConnect.addListener(function(port) {

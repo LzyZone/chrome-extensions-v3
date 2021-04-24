@@ -16,7 +16,7 @@ class Response{
     }
 
     public function setCmd($item){
-        $this->cmd = $item;
+        $this->cmd = strtolower($item);
     }
 
     public function getToken(){
@@ -28,7 +28,7 @@ class Response{
     }
 
     public function success(array $data){
-        $data = [
+        $response = [
             'v'         => '1.0.0',
             'time'      => time(),
             'token'     => $this->getToken(),
@@ -37,7 +37,7 @@ class Response{
             'err_msg'   => 'ok',
             'body'      => $data
         ];
-        return $this->protocol->encode($data);
+        return $this->protocol->encode($response);
     }
 
     public function error($err_code,$err_msg){
